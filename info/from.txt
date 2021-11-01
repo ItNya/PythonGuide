@@ -1,0 +1,2 @@
+предложение для импорта класса из модуля 
+from collections import OrderedDict

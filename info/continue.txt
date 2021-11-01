@@ -1,0 +1,7 @@
+оператор continue, используемый во вложенном цикле for и while. 
+Он продолжается со следующего цикла ближайшей замкнутой петли. 
+
+numbers = range(1,11) 
+for number in numbers:
+	if number == 7:     
+		continue
