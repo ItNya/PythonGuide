@@ -1,8 +1,9 @@
 import os
 import shutil
+import sqlite3
 from os import listdir
-import syntax_2
-from PyQt5 import QtWidgets
+import syntax
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.Qt import *
 
 
@@ -12,25 +13,27 @@ class GuideWindow(QMainWindow):
         self.username = username
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1440, 1440)
+        MainWindow.setWindowTitle("PyGuide")
+        MainWindow.setWindowIcon(QtGui.QIcon('guide.ico'))
         self.centralwidget = QtWidgets.QWidget()
         self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidget)
         self.tab = QTabWidget(self.centralwidget)
         self.tab.resize(1440, 1440)
 
-        self.btnSave = QPushButton('Save')
+        self.btnSave = QPushButton('Сохранить')
         self.btnSave.clicked.connect(self.save)
         self.statusBar().addWidget(self.btnSave)
 
-        self.btnClose = QPushButton('Close')
+        self.btnClose = QPushButton('Закрыть')
         self.btnClose.clicked.connect(self.closed)
         self.statusBar().addWidget(self.btnClose)
 
-        self.btn_add = QPushButton('Add file')
+        self.btn_add = QPushButton('Добавить файл')
         self.btn_add.clicked.connect(self.addfile)
         self.statusBar().addWidget(self.btn_add)
 
-        self.btn_add_name = QLineEdit('Name file')
+        self.btn_add_name = QLineEdit('Имя файла')
         self.statusBar().addWidget(self.btn_add_name)
 
         self.combo = QComboBox(self)
@@ -38,9 +41,13 @@ class GuideWindow(QMainWindow):
         self.combo.addItem(".jpg")
         self.statusBar().addWidget(self.combo)
 
-        self.btn_del = QPushButton('Delete file')
+        self.btn_del = QPushButton('Удалить файл')
         self.btn_del.clicked.connect(self.delete_file)
         self.statusBar().addWidget(self.btn_del)
+
+        self.btn_color = QPushButton('Сменить цвет фона')
+        self.btn_color.clicked.connect(self.changeColor)
+        self.statusBar().addWidget(self.btn_color)
 
 
 # функционал окна справочника
@@ -75,6 +82,8 @@ class GuideWindowFunctional(GuideWindow):
         self.grid.addWidget(self.tab, 1, 0, 1, 1)
         self.grid.addWidget(self.scroll, 1, 1, 2, 2)
         self.opened = []
+
+        self.conn = sqlite3.connect('login.db')
 
     # удаление виджетов справочника
     def del_widgets(self):
@@ -122,7 +131,7 @@ class GuideWindowFunctional(GuideWindow):
                     with open(f'{file_name}', encoding="utf-8") as f:
                         txt = f.read()
                     idx = self.tab.addTab(QTextEdit(), file_name)
-                    syntax_2.PythonHighlighter(self.tab.widget(idx))
+                    syntax.PythonHighlighter(self.tab.widget(idx))
                     self.tab.widget(idx).setPlainText(txt)
                     self.tab.widget(idx).setFont(QFont('Open Sans', 13))
                     self.tab.widget(idx).setObjectName(f'{file_name}')
@@ -227,3 +236,12 @@ class GuideWindowFunctional(GuideWindow):
                 QMessageBox.information(self, 'Внимание!', 'Вы не можете удалить базовые функции')
         except:
             pass
+
+    # меняем цвет фона
+    def changeColor(self):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            style = "QMainWindow {background-color: " + color.name() + "}"
+            self.setStyleSheet(style)
+            self.conn.execute("UPDATE STYLE SET STYLES = ? WHERE USERNAME = ?", (color.name(), self.username))
+            self.conn.commit()

@@ -69,4 +69,7 @@ class Dialog_signUp(QDialog, Ui_signUp):
             self.parent.loginDatabase.conn.execute("INSERT INTO USERS VALUES(?, ?, ?)",
                                                    (username, email, password))
             self.parent.loginDatabase.conn.commit()
+            self.parent.loginDatabase.conn.execute("INSERT INTO STYLE VALUES(?, ?)",
+                                                   (username, '#F3C8F0'))
+            self.parent.loginDatabase.conn.commit()
             self.close()

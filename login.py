@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.Qt import *
 from main import GuideWindowFunctional
 from signup import Dialog_signUp
@@ -123,12 +123,18 @@ class _login_login(QDialog, Ui_login):
         self.setupUi(self)
 
         self.loginDatabase = LoginDatabase('login.db')
-        # проверка, есть ли таблица в базе данных, если нет - создается таблица и заносится запись admin admin
+        # проверка, есть ли таблица в базе данных, если нет - создается таблица и заносится запись admin
         if self.loginDatabase.is_table('USERS'):
             pass
         else:
             self.loginDatabase.conn.execute("CREATE TABLE USERS(USERNAME TEXT NOT NULL, EMAIL TEXT, PASSWORD TEXT)")
             self.loginDatabase.conn.execute("INSERT INTO USERS VALUES(?, ?, ?)", ('admin', 'admin', 'admin'))
+            self.loginDatabase.conn.commit()
+        if self.loginDatabase.is_table('STYLE'):
+            pass
+        else:
+            self.loginDatabase.conn.execute("CREATE TABLE STYLE(USERNAME TEXT NOT NULL, STYLES TEXT NOT NULL)")
+            self.loginDatabase.conn.execute("INSERT INTO STYLE VALUES(?, ?)", ('admin', '#E6CAF0'))
             self.loginDatabase.conn.commit()
 
         self.login_btn.clicked.connect(self.loginCheck)
@@ -154,7 +160,11 @@ class _login_login(QDialog, Ui_login):
         self.welcomeWindow = GuideWindowFunctional(username)
         w, h = self.get_size_of_desktop()
         self.welcomeWindow.resize(w, h)
-        self.welcomeWindow.setStyleSheet(StyleSheet)
+        style = self.loginDatabase.conn.execute("SELECT STYLES FROM STYLE WHERE USERNAME = ?", (username,))
+        style = "QMainWindow {background-color: " + style.fetchall()[0][0] + "}"
+        self.loginDatabase.conn.close()
+        style = StyleSheet + style
+        self.welcomeWindow.setStyleSheet(style)
         self.welcomeWindow.show()
 
     # открытие окна регистрации
@@ -194,6 +204,7 @@ class _login_login(QDialog, Ui_login):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = _login_login()
+    w.setWindowIcon(QtGui.QIcon('log.ico'))
     w.setStyleSheet(StyleSheet)
     w.show()
     sys.exit(app.exec_())

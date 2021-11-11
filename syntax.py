@@ -52,6 +52,7 @@ class PythonHighlighter (QSyntaxHighlighter):
         '\{', '\}', '\(', '\)', '\[', '\]',
     ]
 
+    # обрабатываем файл, для которого был вызван класс
     def __init__(self, document):
         QSyntaxHighlighter.__init__(self, document)
 
