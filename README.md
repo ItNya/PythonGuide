@@ -1,4 +1,4 @@
 # Первым делом установите зависимости
-pip install -r requiments.txt
+pip install -r requirements.txt
 # Запуск программы
 Запустите файл login.py
